@@ -1,0 +1,10 @@
+.DS_Store
+node_modules
+.idea
+.VSCode
+dist
+yarn.lock
+*.tsbuildinfo
+# Package results
+*.gz
+*.tgz
