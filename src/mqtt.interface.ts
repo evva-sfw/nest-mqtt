@@ -46,6 +46,7 @@ export interface MqttModuleOptions extends IClientOptions {
      */
     share?: string;
 
+    topic?: string;
     beforeHandle?: (topic: string, payload: Buffer, packet: Packet) => any;
 }
 
