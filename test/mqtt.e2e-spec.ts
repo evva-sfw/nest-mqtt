@@ -18,11 +18,12 @@ describe('MQTT Module (e2e)', () => {
   const mqttUser = 'test';
   const mqttPassword = 'test'
   let moduleFixture: TestingModule;
-  let brokerService, eventEmitter;
+  let brokerService;
+  let eventEmitter;
 
-  aedesServer.authenticate = function (client, username, password, callback) {
+  aedesServer.authenticate = (client, username, password, callback) => {
     callback(null, username === mqttUser && password.equals(Buffer.from(mqttPassword, 'utf8')));
-  }//authenticate
+  }// authenticate
 
   function providePassword(): Promise<string> {
     return Promise.resolve(mqttPassword);
@@ -60,10 +61,10 @@ describe('MQTT Module (e2e)', () => {
 
   it('test publish/subscribe', async () => {
     const testMsg = {'blubb':'blubb'};
-    let asyncEvent = new Promise<{topic: string, payload: any}>((resolve, reject) => {
-      eventEmitter.on(MQTT_RECEIVE_EVENT, function (topic, payload) {
+    const asyncEvent = new Promise<{topic: string, payload: any}>((resolve, reject) => {
+      eventEmitter.on(MQTT_RECEIVE_EVENT, (topic, payload) => {
         resolve({topic, payload} as {topic: string, payload: any});
-      }.bind(this));
+      });
     });
     eventEmitter.emit(MQTT_SEND_EVENT, testMsg)
     const event = await asyncEvent;

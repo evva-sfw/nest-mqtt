@@ -1,7 +1,7 @@
-import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import { MqttService, Payload, Subscribe, Topic } from "../src";
-import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
-import { MQTT_RECEIVE_EVENT, MQTT_SEND_EVENT, TEST_TOPIC } from "./test.constants";
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { MqttService, Payload, Subscribe, Topic } from '../src';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { MQTT_RECEIVE_EVENT, MQTT_SEND_EVENT, TEST_TOPIC } from './test.constants';
 
 @Injectable()
 export class BrokerService {

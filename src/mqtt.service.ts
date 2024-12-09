@@ -144,7 +144,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
       this.logger.log(this.options.topic);
       return processTopic(subscribeOptions.topic);
     }
-  }//preprocess
+  }// preprocess
 
   _subscribe(
     options: MqttSubscribeOptions,
@@ -179,7 +179,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
       }
 
     });
-  }//_subscribe
+  }// _subscribe
 
   explore() {
     const providers: InstanceWrapper[] = this.discoveryService.getProviders();
