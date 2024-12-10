@@ -10,5 +10,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run Build
-        run: npm i && npx nest build
+        run: npm i && npx nest build && npm run test:e2e
   
