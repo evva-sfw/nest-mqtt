@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ 'main' ]
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,14 +13,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - name: Cache
-        id: build-products
+      - name: Cache node_modules
+        id: node-modules
         uses: actions/cache@v4
         with:
-          path: |
-           node_modules
-           dist
-          key: build-products 
+          path: node_modules
+          key: node-modules
       - name: Run Build
         run: npm i && npx nest build && npm run test:e2e
   
