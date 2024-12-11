@@ -1,0 +1,26 @@
+name: e2e
+on:
+  push:
+    branches: [ 'main' ]
+  pull_request:
+    branches: [ 'main' ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - name: Cache
+        id: build-products
+        uses: actions/cache@v4
+        with:
+          path: |
+           node_modules
+           dist
+          key: build-products 
+      - name: Run Build
+        run: npm i && npx nest build && npm run test:e2e
+  
