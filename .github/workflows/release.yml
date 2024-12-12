@@ -36,10 +36,7 @@ jobs:
         id: node-modules
         uses: actions/cache@v4
         with:
-          path: |
-            node_modules
-            test-app/node_modules
-            .yarn/cache
+          path: node_modules
           key: node-modules
       - name: Import GPG key
         id: import-gpg
