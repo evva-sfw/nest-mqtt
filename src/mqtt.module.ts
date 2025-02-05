@@ -8,7 +8,7 @@ import { DiscoveryModule, DiscoveryService } from '@nestjs/core';
 
 @Global()
 @Module({
-  providers: [MqttService],
+  providers: [MqttService, DiscoveryService],
   imports: [DiscoveryModule],
   exports: [MqttService, MODULE_OPTIONS_TOKEN],
 })
