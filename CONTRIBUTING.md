@@ -29,4 +29,4 @@ This template is integrated with TSLint, Prettier. Using these tools is complete
 
 Is handled by [release-it](https://github.com/release-it/release-it) the config is in [.release-it.json](.release-it.json)
 
-To trigger a release the [release-workflow](https://github.com/evva-sfw/nest-mqtt/actions/workflows/release.yml) is run with the input of what type of release (patch|minor|major) (SEMVER). Then the CHANGELOG.md is updated npm package published and RELEASE page on github is created with the new tag.
+To trigger a release the [release-workflow](https://github.com/evva-sfw/nest-mqtt/actions/workflows/release.yml) is run with the input of what type of release (patch|minor|major) (SEMVER) and according to that the version is bumped. Then the CHANGELOG.md is updated npm package published and RELEASE page on github is created with the new tag.
