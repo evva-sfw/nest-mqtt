@@ -27,10 +27,6 @@ This template is integrated with TSLint, Prettier. Using these tools is complete
 
 ## Publishing
 
-There is a `prepack` hook in `package.json` which prepares the plugin before publishing, so all you need to do is run:
+Is handled by [release-it](https://github.com/release-it/release-it) the config is in [.release-it.json](.release-it.json)
 
-```shell
-npm publish
-```
-
-> **Note**: The [`files`](https://docs.npmjs.com/cli/v7/configuring-npm/package-json#files) array in `package.json` specifies which files get published. If you rename files/directories or add files elsewhere, you may need to update it.
+To trigger a release the [release-workflow](https://github.com/evva-sfw/nest-mqtt/actions/workflows/release.yml) is run with the input of what type of release (patch|minor|major) (SEMVER) and according to that the version is bumped. Then the CHANGELOG.md is updated npm package published and RELEASE page on github is created with the new tag.
