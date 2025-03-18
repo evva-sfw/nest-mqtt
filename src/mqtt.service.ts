@@ -11,7 +11,7 @@ import { MODULE_OPTIONS_TOKEN } from './mqtt.module-definition';
 import { MqttModuleOptions, MqttSubscribeOptions, MqttSubscriber, MqttSubscriberParameter } from './mqtt.interface';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
-import { MQTT_SUBSCRIBE_OPTIONS, MQTT_SUBSCRIBER_PARAMS } from './mqtt.constants';
+import { MQTT_SUBSCRIBE_OPTIONS, MQTT_SUBSCRIBER_PARAMS, TOPIC_VAR_REGEX } from './mqtt.constants';
 import { getTransform } from './mqtt.transform';
 
 @Injectable()
@@ -120,6 +120,8 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
    * Explorer parts
    */
   preprocess(subscribeOptions: MqttSubscribeOptions): string | string[] {
+    const topicResolver = this.options.topicResolver;
+
     const processTopic = (topic) => {
       const queue =
         typeof subscribeOptions.queue === 'boolean' ? subscribeOptions.queue : this.options.queue;
@@ -128,6 +130,11 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
       topic = topic
         .replace('$queue/', '')
         .replace(/^\$share\/([A-Za-z0-9]+)\//, '');
+
+      if (topicResolver) {
+        topic = topic.replace(TOPIC_VAR_REGEX, (match: string, varname: string) => topicResolver(varname));
+      }
+
       if (queue) {
         return `$queue/${topic}`;
       }
@@ -152,13 +159,15 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
     handle,
     provider,
   ) {
+    const topicResolver = this.options.topicResolver;
     const topic = this.preprocess(options);
     this.client.subscribe(topic, (err) => {
       if (!err) {
         // put it into this.subscribers;
         if (!Array.isArray(options.topic)) {
           const topics = new Array<string>();
-          topics.push(options.topic);
+          const topicToPush = (options.topic.search(TOPIC_VAR_REGEX) > -1)? topic as string: options.topic;
+          topics.push(topicToPush);
           options.topic = topics;
         }
         options.topic.forEach((aTopic) => {

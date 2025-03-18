@@ -6,8 +6,16 @@ import { MqttModuleOptions } from '../src/mqtt.interface';
 
 import { EventEmitter2, EventEmitterModule, OnEvent } from '@nestjs/event-emitter';
 import { BrokerService } from './test.broker.service';
-import { MQTT_RECEIVE_EVENT, MQTT_SEND_EVENT, TEST_TOPIC } from './test.constants';
+import {
+  MQTT_RECEIVE_EVENT,
+  MQTT_SEND_EVENT,
+  MQTT_SEND_VARIABLE_EVENT,
+  TEST_TOPIC,
+  VARIABLE_TEST_TOPIC_RESULT,
+  VARIABLE_TEST_TOPIC_VERSION
+} from './test.constants';
 import { DiscoveryModule } from '@nestjs/core';
+import { readFileSync } from 'node:fs';
 
 describe('MQTT Module (e2e)', () => {
   const aedesServer = new Aedes({} as AedesOptions);
@@ -29,6 +37,12 @@ describe('MQTT Module (e2e)', () => {
     return Promise.resolve(mqttPassword);
   }
 
+  function resolveTopic(varname: string): string {
+    if (varname === 'version') {
+      return VARIABLE_TEST_TOPIC_VERSION;
+    }
+  }
+
   beforeAll(async () => {
     server.listen(mqttPort);
     moduleFixture = await Test.createTestingModule({
@@ -43,6 +57,8 @@ describe('MQTT Module (e2e)', () => {
               protocol: mqttProtocol,
               username: mqttUser,
               passwordProvider: providePassword,
+              topicResolver: resolveTopic,
+              rejectUnauthorized: false
             }) as MqttModuleOptions,
         })
       ],
@@ -60,15 +76,28 @@ describe('MQTT Module (e2e)', () => {
   });
 
   it('test publish/subscribe', async () => {
-    const testMsg = {'blubb':'blubb'};
-    const asyncEvent = new Promise<{topic: string, payload: any}>((resolve, reject) => {
+    const testMsg = { 'blubb': 'blubb' };
+    const asyncEvent = new Promise<{ topic: string, payload: any }>((resolve, reject) => {
       eventEmitter.on(MQTT_RECEIVE_EVENT, (topic, payload) => {
-        resolve({topic, payload} as {topic: string, payload: any});
+        resolve({ topic, payload } as { topic: string, payload: any });
       });
     });
     eventEmitter.emit(MQTT_SEND_EVENT, testMsg)
     const event = await asyncEvent;
     expect(event.topic).toEqual(TEST_TOPIC);
+    expect(event.payload).toEqual(testMsg);
+  });
+
+  it('test variable subscribe', async () => {
+    const testMsg = { 'blubb2': 'blubb2' };
+    const asyncEvent = new Promise<{ topic: string, payload: any }>((resolve, reject) => {
+      eventEmitter.on(MQTT_RECEIVE_EVENT, (topic, payload) => {
+        resolve({ topic, payload } as { topic: string, payload: any });
+      });
+    });
+    eventEmitter.emitAsync(MQTT_SEND_VARIABLE_EVENT, testMsg)
+    const event = await asyncEvent;
+    expect(event.topic).toEqual(VARIABLE_TEST_TOPIC_RESULT);
     expect(event.payload).toEqual(testMsg);
   });
 });
