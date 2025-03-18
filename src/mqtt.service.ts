@@ -11,7 +11,12 @@ import { MODULE_OPTIONS_TOKEN } from './mqtt.module-definition';
 import { MqttModuleOptions, MqttSubscribeOptions, MqttSubscriber, MqttSubscriberParameter } from './mqtt.interface';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
-import { MQTT_SUBSCRIBE_OPTIONS, MQTT_SUBSCRIBER_PARAMS, TOPIC_VAR_REGEX } from './mqtt.constants';
+import {
+  MAX_VAR_TOPIC_LENGTH,
+  MQTT_SUBSCRIBE_OPTIONS,
+  MQTT_SUBSCRIBER_PARAMS,
+  TOPIC_VAR_REGEX
+} from './mqtt.constants';
 import { getTransform } from './mqtt.transform';
 
 @Injectable()
@@ -131,7 +136,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
         .replace('$queue/', '')
         .replace(/^\$share\/([A-Za-z0-9]+)\//, '');
 
-      if (topicResolver) {
+      if (topicResolver && topic.length < MAX_VAR_TOPIC_LENGTH) {
         topic = topic.replace(TOPIC_VAR_REGEX, (match: string, varname: string) => topicResolver(varname));
       }
 
@@ -166,7 +171,9 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
         // put it into this.subscribers;
         if (!Array.isArray(options.topic)) {
           const topics = new Array<string>();
-          const topicToPush = (options.topic.search(TOPIC_VAR_REGEX) > -1)? topic as string: options.topic;
+          const topicToPush = (
+            options.topic.length < MAX_VAR_TOPIC_LENGTH && (options.topic.search(TOPIC_VAR_REGEX) > -1)) ?
+            topic as string : options.topic;
           topics.push(topicToPush);
           options.topic = topics;
         }
