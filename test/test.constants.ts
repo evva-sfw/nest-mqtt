@@ -1,4 +1,3 @@
-
 export const TEST_TOPIC = 'test/1/interact';
 export const VARIABLE_TEST_TOPIC = 'test/{version}/interact';
 export const VARIABLE_TEST_TOPIC_VERSION = '2';

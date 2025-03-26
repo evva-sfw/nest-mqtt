@@ -1,9 +1,9 @@
-import {
-  Global,
-  Module,
-} from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { MqttService } from './mqtt.service';
-import { ConfigurableModuleClass, MODULE_OPTIONS_TOKEN } from './mqtt.module-definition';
+import {
+  ConfigurableModuleClass,
+  MODULE_OPTIONS_TOKEN,
+} from './mqtt.module-definition';
 import { DiscoveryModule, DiscoveryService } from '@nestjs/core';
 
 @Global()
@@ -12,6 +12,4 @@ import { DiscoveryModule, DiscoveryService } from '@nestjs/core';
   imports: [DiscoveryModule],
   exports: [MqttService, MODULE_OPTIONS_TOKEN],
 })
-export class MqttModule extends ConfigurableModuleClass {
-
-}
+export class MqttModule extends ConfigurableModuleClass {}
