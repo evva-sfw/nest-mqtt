@@ -95,7 +95,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
    * Subscribe to the given topic with options.
    *
    * @param {string | string[]} topic
-   * @param {IClientPublishOptions} opts
+   * @param {IClientSubscribehOptions} opts
    * @returns {ISubscriptionGrant[]}
    * @throws
    */
@@ -113,7 +113,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
    * Unsubscribes from the given topic with options.
    *
    * @param {string} topic
-   * @param {IClientPublishOptions} opts
+   * @param {IClientSubscribeOptions} opts
    * @returns {Packet}
    * @throws
    */
