@@ -1,7 +1,6 @@
 import { IClientOptions, MqttProtocol, Packet } from 'mqtt/*';
 
 export interface MqttModuleOptions extends IClientOptions {
-
   /**
    * MQTT Broker host
    */
