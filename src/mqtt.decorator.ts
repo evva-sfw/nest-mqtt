@@ -12,7 +12,7 @@ import {
 export function Subscribe(
   topic: string | string[] | MqttSubscribeOptions,
 ): CustomDecorator;
-export function Subscribe(topicOrOptions): CustomDecorator {
+export function Subscribe(topicOrOptions: any): CustomDecorator {
   if (typeof topicOrOptions === 'string' || Array.isArray(topicOrOptions)) {
     return SetMetadata(MQTT_SUBSCRIBE_OPTIONS, {
       topic: topicOrOptions,

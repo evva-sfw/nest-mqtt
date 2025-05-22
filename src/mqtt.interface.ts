@@ -1,6 +1,6 @@
 import { IClientOptions, MqttProtocol, Packet } from 'mqtt/*';
 
-export interface MqttModuleOptions extends IClientOptions {
+export interface MqttConnectOptions extends IClientOptions {
   /**
    * MQTT Broker host
    */
@@ -24,7 +24,7 @@ export interface MqttModuleOptions extends IClientOptions {
 
   /**
    * Mqtt password provider; may be used to obtain a password.
-   * Will be called upon reconnect.
+   * Will be called upon reconnecting.
    * @returns
    */
   passwordProvider?: () => Promise<string>;
@@ -53,7 +53,10 @@ export interface MqttModuleOptions extends IClientOptions {
   share?: string;
 
   topic?: string;
+
   beforeHandle?: (topic: string, payload: Buffer, packet: Packet) => any;
+
+  autoSubscribe?: boolean;
 }
 
 export type MqttMessageTransformer = (payload: Buffer) => any;
