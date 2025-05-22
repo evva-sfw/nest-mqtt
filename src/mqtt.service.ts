@@ -1,10 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, } from '@nestjs/common';
 import {
   MqttClient,
   Packet,
@@ -13,9 +7,8 @@ import {
   ISubscriptionGrant,
   connectAsync,
 } from 'mqtt';
-import { MODULE_OPTIONS_TOKEN } from './mqtt.module-definition';
 import {
-  MqttModuleOptions,
+  MqttConnectOptions,
   MqttSubscribeOptions,
   MqttSubscriber,
   MqttSubscriberParameter,
@@ -31,16 +24,17 @@ import {
 import { getTransform } from './mqtt.transform';
 
 @Injectable()
-export class MqttService implements OnModuleInit, OnModuleDestroy {
+export class MqttService {
   private readonly logger = new Logger('MqttService');
   private readonly reflector = new Reflector();
   private readonly subscribers: MqttSubscriber[];
-  private client: MqttClient;
+
+  private client?: MqttClient;
+  private options?: MqttConnectOptions;
 
   constructor(
     private readonly discoveryService: DiscoveryService,
     private readonly metadataScanner: MetadataScanner,
-    @Inject(MODULE_OPTIONS_TOKEN) private readonly options: MqttModuleOptions,
   ) {
     this.subscribers = [];
   }
@@ -48,16 +42,21 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
   /**
    * Getter for the underlying MQTT client.
    *
-   * @returns {MqttClient}
+   * @returns {MqttClient | undefined}
    */
-  getClient(): MqttClient {
+  getClient(): MqttClient | undefined {
     return this.client;
   }
 
   /**
    * Connect to the configured MQTT broker.
+   *
+   * @param {MqttConnectOptions} options
+   * @throws
    */
-  async connect() {
+  async connect(options: MqttConnectOptions) {
+    this.options = options
+
     // Use password provider to obtain password
     if (this.options.passwordProvider) {
       this.options.password = await this.options.passwordProvider();
@@ -68,7 +67,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
     this.client.on('connect', () => {
       this.logger.log('MQTT connected');
     });
-    this.client.on('disconnect', (packet) => {
+    this.client.on('disconnect', () => {
       this.logger.log('MQTT disconnected');
     });
     this.client.on('error', (error) => {
@@ -87,15 +86,27 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
     this.client.on('offline', () => {
       this.logger.log('MQTT offline');
     });
-
     this.logger.log(`Connected to ${this.options.host}:${this.options.port}`);
+
+    if (options.autoSubscribe === true) {
+      await this.explore();
+    }
+  }
+
+  /**
+   * Disconnect from the MQTT broker.
+   *
+   * @throws
+   */
+  async disconnect() {
+    await this.client?.endAsync(true);
   }
 
   /**
    * Subscribe to the given topic with options.
    *
    * @param {string | string[]} topic
-   * @param {IClientSubscribehOptions} opts
+   * @param {IClientSubscribeOptions} opts
    * @returns {ISubscriptionGrant[]}
    * @throws
    */
@@ -152,6 +163,8 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
 
   /**
    * Explores topics to be subscribed to.
+   *
+   * @throws
    */
   async explore() {
     let counter = 0;
@@ -227,8 +240,6 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
     );
   }
 
-  // - MARK: Private helpers
-
   /**
    * Preprocesses the topic by replacing or resolving vars.
    *
@@ -241,7 +252,7 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
   ): string | string[] {
     const topicResolver = this.options.topicResolver;
 
-    const processTopic = (topic) => {
+    const processTopic = (topic: string) => {
       const queue =
         typeof subscribeOptions.queue === 'boolean'
           ? subscribeOptions.queue
@@ -353,13 +364,13 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
    * @private
    */
   private static topicToRegexp(topic: string): RegExp {
-    // compatible with emqtt
+    // Compatible with emqtt
     return new RegExp(
       '^' +
         topic
           .replace('$queue/', '')
           .replace(/^\$share\/([A-Za-z0-9]+)\//, '')
-          .replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g, '\\$1')
+          .replace(/([\[\]?()\\$^*.|])/g, '\\$1')
           .replace(/\+/g, '([^/]+)')
           .replace(/\/#$/, '(/.*)?') +
         '$',
@@ -395,20 +406,5 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
       m = regex.exec(str);
     }
     return matches;
-  }
-
-  // - MARK: Lifecycle
-
-  async onModuleInit() {
-    await this.connect();
-    await this.explore();
-  }
-
-  async onModuleDestroy() {
-    try {
-      await this.client.endAsync(true);
-    } catch (e) {
-      this.logger.error(e);
-    }
   }
 }

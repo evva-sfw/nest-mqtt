@@ -1,13 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MqttModule } from '../src/mqtt.module';
 import Aedes, { AedesOptions } from 'aedes';
 import { createServer } from 'net';
-import { MqttModuleOptions } from '../src/mqtt.interface';
-
+import { MqttModule } from '../src';
 import {
   EventEmitter2,
   EventEmitterModule,
-  OnEvent,
 } from '@nestjs/event-emitter';
 import { BrokerService } from './test.broker.service';
 import {
@@ -19,7 +16,7 @@ import {
   VARIABLE_TEST_TOPIC_VERSION,
 } from './test.constants';
 import { DiscoveryModule } from '@nestjs/core';
-import { readFileSync } from 'node:fs';
+import { MqttService } from '../src';
 
 describe('MQTT Module (e2e)', () => {
   const aedesServer = new Aedes({} as AedesOptions);
@@ -29,9 +26,10 @@ describe('MQTT Module (e2e)', () => {
   const mqttPort = 1883;
   const mqttUser = 'test';
   const mqttPassword = 'test';
+
   let moduleFixture: TestingModule;
-  let brokerService;
-  let eventEmitter;
+  let eventEmitter: EventEmitter2;
+  let mqttService: MqttService;
 
   aedesServer.authenticate = (client, username, password, callback) => {
     callback(
@@ -53,34 +51,38 @@ describe('MQTT Module (e2e)', () => {
 
   beforeAll(async () => {
     server.listen(mqttPort);
+
     moduleFixture = await Test.createTestingModule({
       imports: [
         DiscoveryModule,
         EventEmitterModule.forRoot(),
-        MqttModule.forRootAsync({
-          useFactory: async () =>
-            ({
-              host: mqttHost,
-              port: mqttPort,
-              protocol: mqttProtocol,
-              username: mqttUser,
-              passwordProvider: providePassword,
-              topicResolver: resolveTopic,
-              rejectUnauthorized: false,
-            }) as MqttModuleOptions,
-        }),
+        MqttModule
       ],
       providers: [BrokerService],
     }).compile();
+
     await moduleFixture.init();
+
     eventEmitter = await moduleFixture.resolve(EventEmitter2);
-    brokerService = await moduleFixture.resolve(BrokerService);
+    mqttService = await moduleFixture.resolve(MqttService);
+
+    await mqttService.connect({
+      host: mqttHost,
+      port: mqttPort,
+      protocol: mqttProtocol,
+      username: mqttUser,
+      rejectUnauthorized: false,
+      autoSubscribe: true,
+      passwordProvider: providePassword,
+      topicResolver: resolveTopic,
+    })
   });
 
   afterAll(async () => {
-    moduleFixture.close();
-    server.close();
+    await mqttService.disconnect();
+    await moduleFixture.close();
     aedesServer.close();
+    server.close();
   });
 
   it('test publish/subscribe', async () => {
@@ -107,7 +109,7 @@ describe('MQTT Module (e2e)', () => {
         });
       },
     );
-    eventEmitter.emitAsync(MQTT_SEND_VARIABLE_EVENT, testMsg);
+    eventEmitter.emit(MQTT_SEND_VARIABLE_EVENT, testMsg);
     const event = await asyncEvent;
     expect(event.topic).toEqual(VARIABLE_TEST_TOPIC_RESULT);
     expect(event.payload).toEqual(testMsg);
