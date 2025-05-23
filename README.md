@@ -54,7 +54,7 @@ export class ExampleModule {
   }
 }
 ```
-> Tip: Use the `autoSubscribe` flag to automatically explore and subscribe to configured topics.
+> Tip: Use the `autoSubscribe` flag to automatically subscribe to all @Subscribe() decorators.
 
 ## Stay in touch
 
