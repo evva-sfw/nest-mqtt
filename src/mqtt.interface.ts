@@ -16,9 +16,9 @@ export interface MqttConnectOptions extends IClientOptions {
   /**
    * MQTT username
    */
-  username: string;
+  username?: string;
   /**
-   * Mqtt password
+   * MQTT password
    */
   password?: string;
 
