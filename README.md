@@ -24,37 +24,37 @@ $ nest build
 
 ## Usage
 
-```ts
-  MqttModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) =>
-        ({
-          host: configService.get<string>(BROKER_HOST),
-          port: configService.get<Number>(BROKER_PORT, {'infer': true}),
-          protocol: configService.get<string>(BROKER_PROTOCOL),
-          username: configService.get<string>(BROKER_CLIENT_USER),
-          password: configService.get<string>(
-            BROKER_CLIENT_PASSWORD,
-          ),
-          share: configService.get<string>(BROKER_SHARED_PREFIX),
-        }) as MqttModuleOptions,
-    }),
-```
+Import the module wherever needed and inject the `MqttService` into your service for use.
 
-When using the ConfigService, make sure that the variables are loaded before accessing them.
-This usually works as follows:
 ```ts
-export class MyModule implements OnModuleInit {
+@Module({
+  imports: [MqttModule],
+})
+export class ExampleModule {
+  constructor(private readonly mqttService: MqttService) {}
   
-  
-  async onModuleInit() {
-    await ConfigModule.envVariablesLoaded;
+  public async example() {
+    try {
+      await this.mqttService.connect({
+        host: '127.0.0.1',
+        protocol: 'mqtt',
+        port: 1883,
+        username: 'test',
+        password: 'test',
+        autoSubscribe: true
+      })
+    } catch (e) {
+      console.log(`Failed to connect: ${e}`)
+    }
+  }
+
+  @Subscribe('exampleTopic')
+  public onExampleTopicEvent(@Payload() payload: object) {
+    console.log(payload)
   }
 }
 ```
-
-## Support
+> Tip: Use the `autoSubscribe` flag to automatically explore and subscribe to configured topics.
 
 ## Stay in touch
 
