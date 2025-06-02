@@ -11,7 +11,7 @@
     "LICENSE"
   ],
   "author": "EVVA Sicherheitstechnologie GmbH",
-  "license": "SEE LICENSE IN <LICENSE>",
+  "license": "EVVA Software License",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/evva-sfw/nest-mqtt.git"
