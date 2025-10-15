@@ -16,4 +16,4 @@ jobs:
         with:
           node-version: lts/*
       - name: Run Build
-        run: npm i && npx nest build
+        run: npm ci && npx nest build
