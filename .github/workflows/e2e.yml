@@ -22,4 +22,4 @@ jobs:
           path: node_modules
           key: node-modules
       - name: Run Build
-        run: npm i && npx nest build && npm run test:e2e
+        run: npm ci && npx nest build && npm run test:e2e
