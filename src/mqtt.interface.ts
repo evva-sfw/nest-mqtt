@@ -71,7 +71,7 @@ export interface MqttSubscribeOptions {
 export interface MqttSubscriberParameter {
   index: number;
   type: 'payload' | 'topic' | 'packet' | 'params';
-  transform?: 'json' | 'text' | MqttMessageTransformer;
+  transform?: 'json' | 'text' | 'raw' | MqttMessageTransformer;
 }
 
 export interface MqttSubscriber {
