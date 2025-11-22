@@ -59,7 +59,9 @@ export function Packet() {
  * @param transform
  * @constructor
  */
-export function Payload(transform?: 'json' | 'text' | MqttMessageTransformer) {
+export function Payload(
+  transform?: 'json' | 'text' | 'raw' | MqttMessageTransformer,
+) {
   return SetParameter({
     type: 'payload',
     transform,
