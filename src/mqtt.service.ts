@@ -168,37 +168,6 @@ export class MqttService {
    */
   async explore() {
     let counter = 0;
-
-    const providers: InstanceWrapper[] = this.discoveryService.getProviders();
-    for (const provider of providers) {
-      const { instance } = provider;
-      if (!instance) {
-        continue;
-      }
-      const keys = this.metadataScanner.getAllMethodNames(
-        Object.getPrototypeOf(instance),
-      );
-      for (const key of keys) {
-        const subscribeOptions: MqttSubscribeOptions = this.reflector.get(
-          MQTT_SUBSCRIBE_OPTIONS,
-          instance[key],
-        );
-        const parameters = this.reflector.get(
-          MQTT_SUBSCRIBER_PARAMS,
-          instance[key],
-        );
-        if (subscribeOptions) {
-          await this._subscribe(
-            subscribeOptions,
-            parameters,
-            instance[key],
-            instance,
-          );
-          counter++;
-        }
-      }
-    }
-    this.logger.log(`Explored ${counter} topics`);
     this.client.on(
       'message',
       (topic: string, payload: Buffer, packet: Packet) => {
@@ -238,6 +207,37 @@ export class MqttService {
         }
       },
     );
+    this.logger.log(`Registered handler for incoming messages`);
+    const providers: InstanceWrapper[] = this.discoveryService.getProviders();
+    for (const provider of providers) {
+      const { instance } = provider;
+      if (!instance) {
+        continue;
+      }
+      const keys = this.metadataScanner.getAllMethodNames(
+        Object.getPrototypeOf(instance),
+      );
+      for (const key of keys) {
+        const subscribeOptions: MqttSubscribeOptions = this.reflector.get(
+          MQTT_SUBSCRIBE_OPTIONS,
+          instance[key],
+        );
+        const parameters = this.reflector.get(
+          MQTT_SUBSCRIBER_PARAMS,
+          instance[key],
+        );
+        if (subscribeOptions) {
+          await this._subscribe(
+            subscribeOptions,
+            parameters,
+            instance[key],
+            instance,
+          );
+          counter++;
+        }
+      }
+    }
+    this.logger.log(`Explored ${counter} topics`);
   }
 
   /**
@@ -307,10 +307,6 @@ export class MqttService {
   ) {
     const topic = this.preprocess(options);
     try {
-      await this.client.subscribeAsync(topic);
-
-      this.logger.log(`Subscribed to topic {${topic}}`);
-
       if (!Array.isArray(options.topic)) {
         const topics = new Array<string>();
         const topicToPush =
@@ -334,6 +330,8 @@ export class MqttService {
           parameters,
         });
       });
+      await this.client.subscribeAsync(topic);
+      this.logger.log(`Subscribed to topic {${topic}}`);
     } catch (err) {
       this.logger.error(`Failed to subscribe to topic {${options.topic}}`);
     }
