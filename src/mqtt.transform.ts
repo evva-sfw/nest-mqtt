@@ -8,16 +8,22 @@ export const TextTransform: MqttMessageTransformer = (payload) => {
   return payload.toString('utf-8');
 };
 
+export const RawTransform: MqttMessageTransformer = (payload) => {
+  return payload;
+};
+
 export function getTransform(
-  transform: 'json' | 'text' | MqttMessageTransformer,
+  transform: 'json' | 'text' | 'raw' | MqttMessageTransformer = 'json',
 ) {
   if (typeof transform === 'function') {
     return transform;
-  } else {
-    if (transform === 'text') {
+  }
+  switch (transform) {
+    case 'text':
       return TextTransform;
-    } else {
+    case 'json':
       return JsonTransform;
-    }
+    case 'raw':
+      return RawTransform;
   }
 }
