@@ -179,14 +179,13 @@ export class MqttService {
             scatterParameters[parameter.index] = parameter;
           }
           try {
-            const transform = getTransform(subscriber.options.transform);
-
             // add an option to do something before handle message.
             if (this.options.beforeHandle) {
               this.options.beforeHandle(topic, payload, packet);
             }
             subscriber.handle.bind(subscriber.provider)(
               ...scatterParameters.map((parameter) => {
+                const transform = getTransform(parameter.transform);
                 switch (parameter?.type) {
                   case 'payload':
                     return transform(payload);
