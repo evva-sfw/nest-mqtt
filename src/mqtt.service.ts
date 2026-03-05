@@ -152,7 +152,7 @@ export class MqttService {
     message: string | Buffer | object,
     opts?: IClientPublishOptions,
   ): Promise<Packet> {
-    if (typeof message === 'object') {
+    if (!Buffer.isBuffer(message) && typeof message === 'object') {
       message = JSON.stringify(message);
     }
     const result = await this.client.publishAsync(topic, message, opts || null);
