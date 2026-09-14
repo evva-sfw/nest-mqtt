@@ -60,6 +60,7 @@ export interface MqttConnectOptions extends IClientOptions {
 }
 
 export type MqttMessageTransformer = (payload: Buffer) => any;
+export type MqttPacket = Packet;
 
 export interface MqttSubscribeOptions {
   topic: string | string[];

@@ -1,13 +1,13 @@
 import { Injectable, Logger, } from '@nestjs/common';
 import {
   MqttClient,
-  Packet,
   IClientPublishOptions,
   IClientSubscribeOptions,
   ISubscriptionGrant,
   connectAsync,
 } from 'mqtt';
 import {
+  MqttPacket,
   MqttConnectOptions,
   MqttSubscribeOptions,
   MqttSubscriber,
@@ -131,7 +131,7 @@ export class MqttService {
   async unsubscribe(
     topic: string,
     opts?: IClientSubscribeOptions,
-  ): Promise<Packet> {
+  ): Promise<MqttPacket> {
     const result = await this.client.unsubscribeAsync(topic, opts || null);
     this.logger.log(`Unsubscribed from topic {${topic}}`);
 
@@ -151,7 +151,7 @@ export class MqttService {
     topic: string,
     message: string | Buffer | object,
     opts?: IClientPublishOptions,
-  ): Promise<Packet> {
+  ): Promise<MqttPacket> {
     if (!Buffer.isBuffer(message) && typeof message === 'object') {
       message = JSON.stringify(message);
     }
@@ -170,7 +170,7 @@ export class MqttService {
     let counter = 0;
     this.client.on(
       'message',
-      (topic: string, payload: Buffer, packet: Packet) => {
+      (topic: string, payload: Buffer, packet: MqttPacket) => {
         const subscriber = this.getSubscriber(topic);
         if (subscriber) {
           const parameters = subscriber.parameters || [];
@@ -268,7 +268,7 @@ export class MqttService {
       if (topicResolver && topic.length < MAX_VAR_TOPIC_LENGTH) {
         topic = topic.replace(
           TOPIC_VAR_REGEX,
-          (match: string, varname: string) => topicResolver(varname),
+          (_match: string, varname: string) => topicResolver(varname),
         );
       }
 

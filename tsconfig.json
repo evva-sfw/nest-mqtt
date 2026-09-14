@@ -1,4 +1,5 @@
 {
+  "include": ["./src/**/*", "test"],
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
@@ -6,7 +7,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "es2017",
+    "target": "es2022",
     "rootDir": "./src",
     "sourceMap": true,
     "outDir": "./dist",
@@ -19,6 +20,7 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "allowJs": true,
+    "strict": false,
     "esModuleInterop": true
   }
 }
