@@ -368,7 +368,7 @@ export class MqttService {
         topic
           .replace('$queue/', '')
           .replace(/^\$share\/([A-Za-z0-9]+)\//, '')
-          .replace(/([\[\]?()\\$^*.|])/g, '\\$1')
+          .replace(/([[\]?()\\$^*.|])/g, '\\$1')
           .replace(/\+/g, '([^/]+)')
           .replace(/\/#$/, '(/.*)?') +
         '$',

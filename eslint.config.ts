@@ -1,23 +1,21 @@
 // @ts-check
 import eslint from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
-import { globalIgnores } from 'eslint/config';
-import globals from 'globals';
-import eslintTS from 'typescript-eslint';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import tseslint from "typescript-eslint"
+import js from "@eslint/js";
 
-export default eslintTS.config(
+export default defineConfig(
+  globalIgnores(['dist/']),
   {
     ignores: ['eslint.config.mjs'],
   },
   eslint.configs.recommended,
-  ...eslintTS.configs.recommendedTypeChecked,
   {
+    files: ['src/**/*.ts'],
+    extends: [js.configs.recommended, tseslint.configs.recommended],
     languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.jest,
-      },
-      ecmaVersion: 5,
+      ecmaVersion: 'latest',
       sourceType: 'module',
       parserOptions: {
         projectService: true,
@@ -25,7 +23,6 @@ export default eslintTS.config(
       },
     },
   },
-  globalIgnores(['dist/']),
   {
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',

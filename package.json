@@ -28,7 +28,7 @@
     "build": "npx tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "fmt": "npm run lint:fix && npm run prettier:fix",
-    "lint": "eslint -c eslint.json",
+    "lint": "eslint -c eslint.config.ts ./src",
     "lint:fix": "npm run lint -- --fix",
     "prettier": "npx prettier \"**/*.{js,ts,jsx,tsx,cjs,cts,mjs,mts,vue,astro,css,scss,json}\" --check",
     "prettier:fix": "npm run prettier -- --write",
@@ -46,6 +46,7 @@
     "mqtt": "^5.10.2"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@nestjs/cli": "^12.0.0",
     "@nestjs/common": "^12.0.0",
     "@nestjs/config": "^12.0.0",
@@ -58,6 +59,8 @@
     "@vitest/coverage-v8": "^4.1.11",
     "aedes": "^1.1.2",
     "auto-changelog": "^2.5.0",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
     "prettier": "3.8.1",
     "reflect-metadata": "^0.2.2",
     "release-it": "^21.0.2",
@@ -85,7 +88,7 @@
     "testEnvironment": "node"
   },
   "dependencies": {
-    "eslint": "^10.10.0",
-    "glob": "^13.0.6"
+    "glob": "^13.0.6",
+    "typescript-eslint": "^8.70.0"
   }
 }
