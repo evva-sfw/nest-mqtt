@@ -36,7 +36,7 @@
     "test:watch": "vitest watch",
     "test:cov": "vitest run --coverage --no-watch",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/vitest --runInBand",
-    "test:e2e": "vitest run --config ./test/jest-e2e.json --no-watch",
+    "test:e2e": "vitest run --config ./test/vitest-e2e.json --no-watch",
     "prepack": "npx nest build"
   },
   "peerDependencies": {
