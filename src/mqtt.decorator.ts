@@ -25,13 +25,13 @@ export function Subscribe(topicOrOptions: any): CustomDecorator {
 function SetParameter(parameter: Partial<MqttSubscriberParameter>) {
   return (target: object, propertyKey: string | symbol, paramIndex: number) => {
     const params =
-      Reflect.getMetadata(MQTT_SUBSCRIBER_PARAMS, target[propertyKey]) || [];
+      Reflect.getMetadata(MQTT_SUBSCRIBER_PARAMS, target[propertyKey] as unknown as object) || [];
     params.push({
       index: paramIndex,
       ...parameter,
     });
-    Reflect.defineMetadata(MQTT_SUBSCRIBER_PARAMS, params, target[propertyKey]);
-  };
+    Reflect.defineMetadata(MQTT_SUBSCRIBER_PARAMS, params, target[propertyKey] as unknown as object);
+  }
 }
 
 /**

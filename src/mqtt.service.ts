@@ -4,10 +4,10 @@ import {
   IClientPublishOptions,
   IClientSubscribeOptions,
   ISubscriptionGrant,
+  type Packet,
   connectAsync,
 } from 'mqtt';
 import {
-  MqttPacket,
   MqttConnectOptions,
   MqttSubscribeOptions,
   MqttSubscriber,
@@ -131,7 +131,7 @@ export class MqttService {
   async unsubscribe(
     topic: string,
     opts?: IClientSubscribeOptions,
-  ): Promise<MqttPacket> {
+  ): Promise<Packet> {
     const result = await this.client.unsubscribeAsync(topic, opts || null);
     this.logger.log(`Unsubscribed from topic {${topic}}`);
 
@@ -151,7 +151,7 @@ export class MqttService {
     topic: string,
     message: string | Buffer | object,
     opts?: IClientPublishOptions,
-  ): Promise<MqttPacket> {
+  ): Promise<Packet> {
     if (!Buffer.isBuffer(message) && typeof message === 'object') {
       message = JSON.stringify(message);
     }
@@ -170,7 +170,7 @@ export class MqttService {
     let counter = 0;
     this.client.on(
       'message',
-      (topic: string, payload: Buffer, packet: MqttPacket) => {
+      (topic: string, payload: Buffer, packet: Packet) => {
         const subscriber = this.getSubscriber(topic);
         if (subscriber) {
           const parameters = subscriber.parameters || [];
@@ -215,21 +215,21 @@ export class MqttService {
         continue;
       }
       const keys = this.metadataScanner.getAllMethodNames(
-        Object.getPrototypeOf(instance),
+        Object.getPrototypeOf(instance) as object
       );
       for (const key of keys) {
         const subscribeOptions: MqttSubscribeOptions = this.reflector.get(
           MQTT_SUBSCRIBE_OPTIONS,
-          instance[key],
+          instance[key] as (args: any) => unknown,
         );
         const parameters = this.reflector.get(
           MQTT_SUBSCRIBER_PARAMS,
-          instance[key],
+          instance[key] as (args: any) => unknown,
         );
         if (subscribeOptions) {
           await this._subscribe(
             subscribeOptions,
-            parameters,
+            parameters as MqttSubscriberParameter[],
             instance[key],
             instance,
           );
@@ -332,8 +332,11 @@ export class MqttService {
       });
       await this.client.subscribeAsync(topic);
       this.logger.log(`Subscribed to topic {${topic}}`);
-    } catch (err) {
-      this.logger.error(`Failed to subscribe to topic {${options.topic}}`);
+    } catch (err: any) {
+      const errMessage = err.message ?? 'Unknown Error';
+      this
+        .logger
+        .error(`Failed to subscribe to topic {${options.topic}}: ${errMessage}`);
     }
   }
 
