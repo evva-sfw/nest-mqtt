@@ -1,3 +1,5 @@
+          echo "Asset to be uploaded is: $UPLOAD_ASSET"
+          echo "Asset to be uploaded is: $UPLOAD_ASSET"
 name: Release and publish to npm
 on:
   workflow_dispatch:
@@ -6,7 +8,7 @@ on:
         type: choice
         description: What type of release?
         options:
-          - ""
+          - infer
           - patch
           - minor
           - major
@@ -72,6 +74,12 @@ jobs:
           tar -xvzf git-cliff-*.tar.gz
           mv "./git-cliff-${GIT_CLIFF_VERSION}/git-cliff" "/usr/local/bin/git-cliff"
           rm -rf "./git-cliff-${GIT_CLIFF_VERSION}" *.tar.gz
+          echo "Asset to be uploaded is: $UPLOAD_ASSET"
+          echo "Asset to be uploaded is: $UPLOAD_ASSET"
+          echo "Asset to be uploaded is: $UPLOAD_ASSET"
+          echo "Asset to be uploaded is: $UPLOAD_ASSET"
+          echo "Asset to be uploaded is: $UPLOAD_ASSET"
+          echo "Asset to be uploaded is: $UPLOAD_ASSET"
 
       - name: Declare release type
         env:
@@ -91,7 +99,11 @@ jobs:
           VERSION_TYPE: ${{ github.event.inputs.input_version }}
         run: |
             set -e
-            git-cliff --bump $VERSION_TYPE --bumped-version > version
+            if [[ "$VERSION_TYPE" == 'infer' ]]; then
+              git-cliff --bump --bumped-version > version
+            else
+              git-cliff --bump $VERSION_TYPE --bumped-version > version
+            fi
             echo "New version will be $(cat version)"
             NEW_TAG=$(cat version)
             echo "new-tag=$NEW_TAG" >> "$GITHUB_OUTPUT"
@@ -105,20 +117,18 @@ jobs:
             set -e
             echo '::group:: Preparing files with updated versions'
             echo "New version will be $NEW_TAG"
-            jq --arg version "$NEW_TAG" '.version = $version' ${{ github.workspace }}/package.json > temp.json && mv temp.json ${{ github.workspace }}/package.json
-            jq --arg version "$NEW_TAG" '.version = $version' ${{ github.workspace }}/package-lock.json > temp.json && mv temp.json ${{ github.workspace }}/package-lock.json
-            jq --arg version "$NEW_TAG" '.packages[""].version = $version' ${{ github.workspace }}/package-lock.json > temp.json && mv temp.json ${{ github.workspace }}/package-lock.json
+            npm version "$NEW_TAG" --no-git-tag-version
             echo '::endgroup::'
             echo '::group:: Reading package.json'
             cat ${{ github.workspace }}/package.json
             echo '::endgroup::'
             echo '::group:: Reading package-lock.json'
-            cat ${{ github.workspace }}/package-lock.json
+            head ${{ github.workspace }}/package-lock.json
             echo '::endgroup::'
 
         # Update the version in the repo package files and commit
       - name: Commit & Push changes
-        uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
+        uses: iarekylew00t/verified-bot-commit@42a042b0407248f3c0acac00c389e729e3476e86 # v2.3.5
         with:
           ref: main
           token: ${{ steps.app-token.outputs.token }}
@@ -203,7 +213,7 @@ jobs:
           UPLOAD_ASSET=$(find "${{ github.workspace }}" -maxdepth 1 -type f -name '*.tgz')
 
           echo '::endgroup::'
-          echo "Asset to be uploaded is: $UPLOAD_ASSET"
+          echo "::group:: Asset to be uploaded is: $UPLOAD_ASSET"
           echo "upload-asset=$UPLOAD_ASSET" >> "$GITHUB_OUTPUT"
           echo '::endgroup::'
 
@@ -216,8 +226,18 @@ jobs:
           TAG_NAME: ${{ needs.bump-version.outputs.new-tag }}
         run: |
           set -e
+          for i in {1..5}; do
+            set +e
+            git fetch --tags origin "$TAG_NAME" && break
+            set -e
+            echo "Tag not fetchable yet, retrying..."
+            sleep 0.5
+            if [[ "$i" == 5 ]]; then
+              echo "Tag $TAG_NAME still not fetchable after 5 attempts"
+              exit i
+            fi
+          done
           gh release create "$TAG_NAME" --target $(git rev-parse HEAD) --notes "Generating..." --title "$TAG_NAME"
-          git fetch --tags
 
       # Use git cliff to generate release notes
       - name: Generate release notes and update release
@@ -282,10 +302,14 @@ jobs:
         run: |
           set -e
           git-cliff -c cliff.toml -o CHANGELOG.md
+
+          echo '::group:: Changelog'
           cat CHANGELOG.md
 
+          echo '::endgroup::'
+
       - name: Commit & Push changes
-        uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
+        uses: iarekylew00t/verified-bot-commit@42a042b0407248f3c0acac00c389e729e3476e86 # v2.3.5
         with:
           ref: main
           token:  ${{ steps.app-token.outputs.token }}
