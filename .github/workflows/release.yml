@@ -75,11 +75,6 @@ jobs:
           mv "./git-cliff-${GIT_CLIFF_VERSION}/git-cliff" "/usr/local/bin/git-cliff"
           rm -rf "./git-cliff-${GIT_CLIFF_VERSION}" *.tar.gz
           echo "Asset to be uploaded is: $UPLOAD_ASSET"
-          echo "Asset to be uploaded is: $UPLOAD_ASSET"
-          echo "Asset to be uploaded is: $UPLOAD_ASSET"
-          echo "Asset to be uploaded is: $UPLOAD_ASSET"
-          echo "Asset to be uploaded is: $UPLOAD_ASSET"
-          echo "Asset to be uploaded is: $UPLOAD_ASSET"
 
       - name: Declare release type
         env:
@@ -136,7 +131,6 @@ jobs:
           files: |
             package.json
             package-lock.json
-
 
   build-package:
     needs: bump-version
