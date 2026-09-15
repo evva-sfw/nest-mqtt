@@ -1,5 +1,3 @@
-          echo "Asset to be uploaded is: $UPLOAD_ASSET"
-          echo "Asset to be uploaded is: $UPLOAD_ASSET"
 name: Release and publish to npm
 on:
   workflow_dispatch:
