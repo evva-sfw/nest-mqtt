@@ -1,10 +1,10 @@
 import { Injectable, Logger, } from '@nestjs/common';
 import {
   MqttClient,
-  Packet,
   IClientPublishOptions,
   IClientSubscribeOptions,
   ISubscriptionGrant,
+  type Packet,
   connectAsync,
 } from 'mqtt';
 import {
@@ -215,21 +215,21 @@ export class MqttService {
         continue;
       }
       const keys = this.metadataScanner.getAllMethodNames(
-        Object.getPrototypeOf(instance),
+        Object.getPrototypeOf(instance) as object
       );
       for (const key of keys) {
         const subscribeOptions: MqttSubscribeOptions = this.reflector.get(
           MQTT_SUBSCRIBE_OPTIONS,
-          instance[key],
+          instance[key] as (args: any) => unknown,
         );
         const parameters = this.reflector.get(
           MQTT_SUBSCRIBER_PARAMS,
-          instance[key],
+          instance[key] as (args: any) => unknown,
         );
         if (subscribeOptions) {
           await this._subscribe(
             subscribeOptions,
-            parameters,
+            parameters as MqttSubscriberParameter[],
             instance[key],
             instance,
           );
@@ -268,7 +268,7 @@ export class MqttService {
       if (topicResolver && topic.length < MAX_VAR_TOPIC_LENGTH) {
         topic = topic.replace(
           TOPIC_VAR_REGEX,
-          (match: string, varname: string) => topicResolver(varname),
+          (_match: string, varname: string) => topicResolver(varname),
         );
       }
 
@@ -332,8 +332,11 @@ export class MqttService {
       });
       await this.client.subscribeAsync(topic);
       this.logger.log(`Subscribed to topic {${topic}}`);
-    } catch (err) {
-      this.logger.error(`Failed to subscribe to topic {${options.topic}}`);
+    } catch (err: any) {
+      const errMessage = err.message ?? 'Unknown Error';
+      this
+        .logger
+        .error(`Failed to subscribe to topic {${options.topic}}: ${errMessage}`);
     }
   }
 
@@ -368,7 +371,7 @@ export class MqttService {
         topic
           .replace('$queue/', '')
           .replace(/^\$share\/([A-Za-z0-9]+)\//, '')
-          .replace(/([\[\]?()\\$^*.|])/g, '\\$1')
+          .replace(/([[\]?()\\$^*.|])/g, '\\$1')
           .replace(/\+/g, '([^/]+)')
           .replace(/\/#$/, '(/.*)?') +
         '$',

@@ -1,8 +1,6 @@
 import {
   Inject,
   Injectable,
-  OnModuleDestroy,
-  OnModuleInit,
 } from '@nestjs/common';
 import { MqttService, Payload, Subscribe, Topic } from '../src';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';

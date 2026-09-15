@@ -6,6 +6,7 @@ on:
         type: choice
         description: What type of release?
         options:
+          - ""
           - patch
           - minor
           - major
