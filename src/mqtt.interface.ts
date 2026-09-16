@@ -1,4 +1,4 @@
-import { IClientOptions, MqttProtocol, Packet } from 'mqtt/*';
+import { IClientOptions, MqttProtocol, Packet } from 'mqtt';
 
 export interface MqttConnectOptions extends IClientOptions {
   /**

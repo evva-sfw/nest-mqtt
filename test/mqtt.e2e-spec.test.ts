@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import Aedes, { AedesOptions } from 'aedes';
+import { Aedes ,AedesOptions } from 'aedes';
 import { createServer } from 'net';
 import { MqttModule } from '../src';
 import {
@@ -17,9 +17,10 @@ import {
 } from './test.constants';
 import { DiscoveryModule } from '@nestjs/core';
 import { MqttService } from '../src';
+import { it, expect, describe, beforeAll, afterAll } from "vitest";
 
-describe('MQTT Module (e2e)', () => {
-  const aedesServer = new Aedes({} as AedesOptions);
+describe('MQTT Module (e2e)', async () => {
+  const aedesServer = await Aedes.createBroker({} as AedesOptions);
   const server = createServer(aedesServer.handle);
   const mqttHost = '127.0.0.1';
   const mqttProtocol = 'mqtt';
@@ -35,7 +36,7 @@ describe('MQTT Module (e2e)', () => {
     callback(
       null,
       username === mqttUser &&
-        password.equals(Buffer.from(mqttPassword, 'utf8')),
+        (password?.equals(Buffer.from(mqttPassword, 'utf8')) ?? false),
     );
   }; // authenticate
 
@@ -43,7 +44,7 @@ describe('MQTT Module (e2e)', () => {
     return Promise.resolve(mqttPassword);
   }
 
-  function resolveTopic(varname: string): string {
+  function resolveTopic(varname: string): string | undefined {
     if (varname === 'version') {
       return VARIABLE_TEST_TOPIC_VERSION;
     }
