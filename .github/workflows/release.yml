@@ -217,6 +217,7 @@ jobs:
           TAG_NAME: ${{ needs.bump-version.outputs.new-tag }}
         run: |
           set -e
+          gh release create "$TAG_NAME" --target $(git rev-parse HEAD) --notes "Generating..." --title "$TAG_NAME"
           for i in {1..5}; do
             set +e
             git fetch --tags origin "$TAG_NAME" && break
@@ -228,7 +229,6 @@ jobs:
               exit i
             fi
           done
-          gh release create "$TAG_NAME" --target $(git rev-parse HEAD) --notes "Generating..." --title "$TAG_NAME"
 
       # Use git cliff to generate release notes
       - name: Generate release notes and update release
