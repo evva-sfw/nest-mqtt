@@ -14,7 +14,7 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions: {}
 env:
-  GIT_CLIFF_VERSION: "2.13.1"
+  GIT_CLIFF_VERSION: ${{ vars.GLOBAL_GIT_CLIFF_VERSION }}
 
 jobs:
   bump-version:
@@ -91,10 +91,26 @@ jobs:
           VERSION_TYPE: ${{ github.event.inputs.input_version }}
         run: |
             set -e
+            bump() {
+              local old=$1 type=$2 major minor patch new
+              IFS=. read -r major minor patch <<< "${old%%[-+]*}"
+              case $type in
+                major) new="$((major+1)).0.0" ;;
+                minor) new="$major.$((minor+1)).0" ;;
+                patch) new="$major.$minor.$((patch+1))" ;;
+                *) echo "usage: bump VERSION major|minor|patch" >&2; return 1 ;;
+              esac
+              dpkg --compare-versions "$new" gt "$old" || { echo "not an increase?!" >&2; return 1; }
+              echo "${new}"
+            }
+            git fetch --tags
+            LATEST_TAG=$(git describe --tags --abbrev=0)
+            LATEST_TAG=${LATEST_TAG#v}
+            echo "Latest tag fetched is ${LATEST_TAG}"
             if [[ "$VERSION_TYPE" == 'infer' ]]; then
               git-cliff --bump --bumped-version > version
             else
-              git-cliff --bump $VERSION_TYPE --bumped-version > version
+              bump "$LATEST_TAG" "$VERSION_TYPE" > version
             fi
             echo "New version will be $(cat version)"
             NEW_TAG=$(cat version)
