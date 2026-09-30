@@ -33,8 +33,8 @@ render_always = true
 # An array of regex based postprocessors to modify the changelog.
 postprocessors = [
     # Replace the placeholder <REPO> with a URL.
-    { pattern = '<REPO>', replace = "https://github.com/evva-sfw/nest-mqtt" },
-    { pattern = '((\w+\s)?#([0-9]+))', replace = "[#${3}](https://github.com/evva-sfw/nest-mqtt/pull/${3})" },
+    { pattern = '<REPO>', replace = "https://evva.ghe.com/SFW/nest-mqtt" },
+    { pattern = '((\w+\s)?#([0-9]+))', replace = "[#${3}](https://evva.ghe.com/SFW/nest-mqtt/pull/${3})" },
 
 ]
 # render body even when there are no releases to process
