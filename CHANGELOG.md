@@ -1,10 +1,11 @@
-## [2.1.0](https://github.com/evva-sfw/nest-mqtt/compare/2.0.12...2.1.0) - 2026-09-17
+## [3.0.0](https://github.com/evva-sfw/nest-mqtt/compare/2.0.12...3.0.0) - 2026-09-30
 
 ### 🚀 Continuous Integration
 
 - Update release workflow ([#51](https://github.com/evva-sfw/nest-mqtt/pull/51))
 - Fixed bug in release workflow ([#52](https://github.com/evva-sfw/nest-mqtt/pull/52))
 - Removeed unused files ([#53](https://github.com/evva-sfw/nest-mqtt/pull/53))
+- Create manual bump logic for semantic versioning in release workflow ([#55](https://github.com/evva-sfw/nest-mqtt/pull/55))
 
 ### 🧹 Chore
 
